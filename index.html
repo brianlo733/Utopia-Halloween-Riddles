@@ -35,6 +35,9 @@
     .spooky-glow-orange {
       box-shadow: 0 0 20px rgba(249, 115, 22, 0.25);
     }
+    .spooky-glow-gold {
+      box-shadow: 0 0 25px rgba(234, 179, 8, 0.35);
+    }
   </style>
 </head>
 <body class="min-h-screen pb-16 antialiased selection:bg-purple-500 selection:text-white">
@@ -49,11 +52,11 @@
         </span>
       </div>
 
-      <!-- Language Selector & Reset -->
       <div class="flex items-center gap-1.5">
-        <button onclick="resetProgress()" title="重設進度" class="bg-purple-950/60 hover:bg-rose-950/80 text-purple-300 hover:text-rose-400 p-1.5 rounded-lg border border-purple-800/40 text-xs transition">
-          <i class="fa-solid fa-rotate-right"></i>
-        </button>
+        
+        
+
+        <!-- Language Selector -->
         <div class="flex items-center gap-1 bg-purple-950/60 p-1 rounded-lg border border-purple-800/40 text-xs shrink-0">
           <button onclick="setLanguage('en')" id="btn-en" class="px-1.5 py-0.5 rounded font-medium transition">EN</button>
           <button onclick="setLanguage('zh-HK')" id="btn-zh-HK" class="px-1.5 py-0.5 rounded font-medium transition">繁</button>
@@ -65,7 +68,7 @@
     <!-- Progress Indicator -->
     <div class="max-w-md mx-auto mt-2.5">
       <div class="flex justify-between items-center text-xs text-purple-300 mb-1 font-medium">
-        <span id="txt-progress-label">解謎挑戰進度</span>
+        <span id="txt-progress-label">解謎挑戰進度 (雙階段)</span>
         <span id="progressText" class="font-bold text-orange-400">0 / 9</span>
       </div>
       <div class="w-full bg-purple-950/80 rounded-full h-2 overflow-hidden p-0.5 border border-purple-800/30">
@@ -86,62 +89,118 @@
 
       <h1 class="text-xl font-bold text-white mb-2 flex items-center justify-center gap-1.5">
         <span class="text-orange-400">🎃</span>
-        <span>Welcome to Utopia Halloween Riddles</span>
+        <span>Utopia Halloween Riddles</span>
         <span class="text-orange-400">🎃</span>
       </h1>
       <p id="txt-welcome-sub" class="text-xs text-purple-300/80 leading-relaxed max-w-xs mx-auto">
-        解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！進度會自動儲存。
+        完成頭 5 條拎【細獎】！再挑戰後面 4 條困難題衝刺【大獎】！
       </p>
     </div>
 
-    <!-- Riddles List Container -->
-    <div id="riddlesContainer" class="space-y-5">
-      <!-- Cards rendered dynamically via JS -->
+    <!-- Stage 1 Container (Riddles 1-5: Easy) -->
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 px-1">
+        <span id="txt-s1-tag" class="bg-orange-500/20 text-orange-400 border border-orange-500/40 text-xs font-extrabold px-2.5 py-1 rounded-lg">
+          Stage 1：簡單組 (前 5 題)
+        </span>
+        <span id="txt-s1-desc" class="text-[11px] text-purple-300">達成即可換領細獎 ✨</span>
+      </div>
+      <div id="stage1Container" class="space-y-5"></div>
     </div>
 
-    <!-- Final Secret Card (Unlocked when all answered) -->
-    <div id="secretCard" class="hidden spooky-card spooky-glow-orange rounded-2xl p-6 text-center border-2 border-orange-500/60 relative overflow-hidden transition-all duration-700">
-      <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-2xl text-black">
-        <i class="fa-solid fa-trophy"></i>
+    <!-- Stage 1 Checkpoint Card (Unlocked when 1-5 solved) -->
+    <div id="stage1Card" class="hidden spooky-card spooky-glow-orange rounded-2xl p-6 text-center border-2 border-amber-500/60 relative overflow-hidden transition-all duration-700">
+      <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg text-xl text-black">
+        <i class="fa-solid fa-gift"></i>
       </div>
       
-      <h2 id="txt-congrats-title" class="text-xl font-extrabold text-white mb-1">
-        🎉 恭喜通關！
+      <h2 id="txt-s1-title" class="text-lg font-extrabold text-amber-300 mb-1">
+        🎁 恭喜達成 Stage 1 (細獎解鎖)！
       </h2>
-      <p id="txt-congrats-sub" class="text-xs text-purple-200 mb-4">
-        你已經成功解開所有萬聖節謎語！以下係你嘅專屬通關 Code：
+      <p id="txt-s1-sub" class="text-xs text-purple-200 mb-3">
+        你已經完成頭 5 條簡單題！可先登記拎走細獎，或繼續向下挑戰困難題衝刺大獎！
       </p>
 
-      <!-- 專屬 Code 展示區 -->
-      <div class="bg-black/60 border border-orange-500/40 rounded-xl p-4 mb-4">
-        <span class="text-xs text-orange-400 block mb-1 font-semibold tracking-wider uppercase" id="txt-code-label">你的專屬通關 Code</span>
-        <div id="playerCodeDisplay" class="text-sm xs:text-base font-extrabold text-amber-300 tracking-wider font-mono select-all break-all">
+      <!-- 專屬 Code 展示 -->
+      <div class="bg-black/60 border border-amber-500/40 rounded-xl p-3 mb-3">
+        <span id="txt-s1-code-label" class="text-[11px] text-amber-400 block mb-0.5 font-semibold">你的專屬通關 Code</span>
+        <div id="stage1CodeDisplay" class="text-sm font-extrabold text-amber-200 font-mono select-all break-all">
           Generating...
         </div>
       </div>
 
-      <!-- 玩家輸入名字與一鍵登記區 -->
-      <div class="bg-purple-950/60 border border-orange-500/50 rounded-xl p-4 mb-4 text-left shadow-lg">
-        <div class="flex items-start gap-2 mb-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5 shrink-0"></i>
-          <p id="txt-register-notice" class="text-xs font-bold text-amber-300 leading-snug">
-            ⚠️ 必須填寫名字/IG並按「登記存檔」，通關紀錄才會發送至系統作實！
-          </p>
-        </div>
-
-        <label class="block text-xs font-semibold text-purple-200 mb-1.5" id="txt-name-label">
-          請輸入名字或 IG：
+      <!-- 階段一登記區 -->
+      <div class="bg-purple-950/60 border border-purple-800/60 rounded-xl p-3.5 text-left">
+        <label id="txt-s1-input-label" class="block text-xs font-semibold text-purple-200 mb-1.5">
+          請輸入名字或 IG (登記細獎)：
         </label>
         <div class="flex gap-2">
-          <input type="text" id="playerNameInput" placeholder="寫名或寫 IG" 
-            class="flex-1 bg-black/60 border border-purple-800/60 rounded-xl px-3 py-2 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-orange-500"
+          <input type="text" id="stage1NameInput" placeholder="寫名或寫 IG" 
+            class="flex-1 bg-black/60 border border-purple-800/60 rounded-xl px-3 py-2 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-amber-500"
           >
-          <button onclick="submitPlayerRecord()" id="submitRecordBtn" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold px-3.5 py-2 rounded-xl text-xs transition shadow-md shrink-0">
-            登記存檔
+          <button onclick="submitStage1Record()" id="stage1Btn" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-3 py-2 rounded-xl text-xs transition shadow-md shrink-0">
+            登記細獎
           </button>
         </div>
+        <p id="stage1Status" class="text-xs text-emerald-400 mt-2 text-center hidden font-bold">
+          ✓ 細獎登記成功！快去攤位領獎，並解鎖下方困難題！
+        </p>
+      </div>
+    </div>
+
+    <!-- Stage 2 Container (Riddles 6-9: Hard) -->
+    <div id="stage2Wrapper" class="space-y-3 opacity-40 pointer-events-none transition-all duration-500">
+      <div class="flex items-center gap-2 px-1 pt-4">
+        <span id="txt-s2-tag" class="bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-extrabold px-2.5 py-1 rounded-lg">
+          Stage 2：地獄困難組 (後 4 題)
+        </span>
+        <span id="stage2LockNotice" class="text-[11px] text-rose-400 font-bold">🔒 完成上方 Stage 1 後解鎖大獎挑戰</span>
+      </div>
+      <div id="stage2Container" class="space-y-5"></div>
+    </div>
+
+    <!-- Final Secret Card (Grand Prize - Unlocked when all 9 answered) -->
+    <div id="secretCard" class="hidden spooky-card spooky-glow-gold rounded-2xl p-6 text-center border-2 border-amber-400 relative overflow-hidden transition-all duration-700">
+      <div class="w-16 h-16 bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-2xl text-black">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      
+      <h2 id="txt-grand-title" class="text-xl font-extrabold text-amber-300 mb-1">
+        👑 終極通關！大獎解鎖！
+      </h2>
+      <p id="txt-grand-sub" class="text-xs text-purple-200 mb-2">
+        太神喇！你成功解開所有 9 條萬聖節謎語，獲得大獎資格！
+      </p>
+
+      <!-- 大獎限量提示 (已支援多語言) -->
+      <div id="txt-limited-notice" class="inline-block bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-full mb-3">
+        ⚠️ 大獎數量有限，先到先得，派完即止！
+      </div>
+
+      <!-- 最終大獎 Code 展示區 -->
+      <div class="bg-black/60 border border-amber-400/50 rounded-xl p-4 mb-4">
+        <span id="txt-grand-code-label" class="text-xs text-amber-400 block mb-1 font-semibold tracking-wider uppercase">你的專屬通關 Code</span>
+        <div id="playerCodeDisplay" class="text-sm xs:text-base font-extrabold text-amber-200 tracking-wider font-mono select-all break-all">
+          Generating...
+        </div>
+      </div>
+
+      <!-- 大獎登記區 -->
+      <div class="bg-purple-950/60 border border-amber-500/50 rounded-xl p-4 mb-4 text-left shadow-lg space-y-3">
+        <div>
+          <label id="txt-grand-input-label" class="block text-xs font-semibold text-purple-200 mb-1">
+            登記大獎使用之名字/IG：
+          </label>
+          <div id="registeredNameDisplay" class="w-full bg-black/60 border border-amber-500/40 rounded-xl px-3 py-2 text-xs font-bold text-amber-300 font-mono">
+            -
+          </div>
+        </div>
+        
+        <button onclick="submitPlayerRecord()" id="submitRecordBtn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-black font-extrabold py-2.5 rounded-xl text-xs transition shadow-md">
+          一鍵登記大獎
+        </button>
         <p id="saveStatus" class="text-xs text-emerald-400 mt-2 text-center hidden font-bold">
-          ✓ 成功登記！請截圖此畫面作通關憑證！
+          ✓ 大獎登記成功！請截圖此畫面領取終極大獎！
         </p>
       </div>
 
@@ -164,120 +223,167 @@
 
     const i18n = {
       'en': {
-        progressLabel: 'Challenge Progress',
-        welcomeSub: 'Solve all 9 spooky Halloween riddles to unlock your unique clearance Code! Progress auto-saves.',
-        submitBtn: 'Submit Answer',
-        solvedBadge: 'SOLVED',
-        wrongMsg: 'Incorrect answer. Try again!',
-        congratsTitle: '🎉 Congratulations!',
-        congratsSub: 'You solved all riddles! Here is your unique clearance Code:',
-        codeLabel: 'Your Unique Clearance Code',
-        registerNotice: '⚠️ You MUST enter your name/IG and click "Save Record" to submit your clearance data!',
-        nameLabel: 'Enter Name or IG:',
-        namePlaceholder: 'Enter name or IG',
-        registerBtn: 'Save Record',
-        copyBtn: 'Copy Unique Code',
+        progressLabel: 'Riddle Progress (2 Stages)',
+        welcomeSub: 'Solve first 5 for Minor Prize! Complete next 4 for Grand Prize!',
+        s1Tag: 'Stage 1: Easy (First 5)',
+        s1Desc: 'Solve to claim Minor Prize ✨',
+        s1Title: '🎁 Stage 1 Cleared (Minor Prize Unlocked)!',
+        s1Sub: 'You completed the first 5 easy riddles! Register to claim your prize or keep going!',
+        s1CodeLabel: 'Your Clearance Code',
+        s1InputLabel: 'Enter Name or IG (For Minor Prize):',
+        s1Btn: 'Register Minor Prize',
+        s1Registered: 'Minor Prize Registered',
+        s1Success: '✓ Registered! Go to the booth to claim your prize!',
+        s2Tag: 'Stage 2: Hard (Next 4)',
+        s2Locked: '🔒 Solve Stage 1 above to unlock Grand Prize challenge',
+        s2Unlocked: '🔓 Grand Prize Challenge Unlocked!',
+        grandTitle: '👑 Final Clear! Grand Prize Unlocked!',
+        grandSub: 'Awesome! You solved all 9 riddles and unlocked the Grand Prize!',
+        limitedNotice: '⚠️ Limited Grand Prizes available, first-come first-served while stocks last!',
+        grandCodeLabel: 'Your Clearance Code',
+        grandInputLabel: 'Name / IG used for Grand Prize:',
+        grandBtn: 'Register Grand Prize',
+        grandRegistered: 'Grand Prize Registered',
+        grandSuccess: '✓ Grand Prize Registered! Take a screenshot to claim!',
+        placeholder: 'Enter Name or IG',
+        copyBtn: 'Copy Clearance Code',
         copiedToast: '✓ Code copied to clipboard!'
       },
       'zh-HK': {
-        progressLabel: '解謎挑戰進度',
-        welcomeSub: '解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！進度會自動儲存。',
-        submitBtn: '提交答案',
-        solvedBadge: '已解答',
-        wrongMsg: '答案唔正確，再試試！',
-        congratsTitle: '🎉 恭喜通關！',
-        congratsSub: '你已經成功解開所有萬聖節謎語！以下係你嘅專屬通關 Code：',
-        codeLabel: '你的專屬通關 Code',
-        registerNotice: '⚠️ 必須填寫名字/IG並按「登記存檔」，通關紀錄才會發送至系統作實！',
-        nameLabel: '請輸入名字或 IG：',
-        namePlaceholder: '寫名或寫 IG',
-        registerBtn: '登記存檔',
+        progressLabel: '解謎挑戰進度 (雙階段)',
+        welcomeSub: '完成頭 5 條拎【細獎】！再挑戰後面 4 條困難題衝刺【大獎】！',
+        s1Tag: 'Stage 1：簡單組 (前 5 題)',
+        s1Desc: '達成即可換領細獎 ✨',
+        s1Title: '🎁 恭喜達成 Stage 1 (細獎解鎖)！',
+        s1Sub: '你已經完成頭 5 條簡單題！可先登記拎走細獎，或繼續向下挑戰困難題衝刺大獎！',
+        s1CodeLabel: '你的專屬通關 Code',
+        s1InputLabel: '請輸入名字或 IG (登記細獎)：',
+        s1Btn: '登記細獎',
+        s1Registered: '細獎已登記',
+        s1Success: '✓ 細獎登記成功！快去攤位領獎，並解鎖下方困難題！',
+        s2Tag: 'Stage 2：地獄困難組 (後 4 題)',
+        s2Locked: '🔒 完成上方 Stage 1 後解鎖大獎挑戰',
+        s2Unlocked: '🔓 已解鎖大獎挑戰！',
+        grandTitle: '👑 終極通關！大獎解鎖！',
+        grandSub: '太神喇！你成功解開所有 9 條萬聖節謎語，獲得大獎資格！',
+        limitedNotice: '⚠️ 大獎數量有限，先到先得，派完即止！',
+        grandCodeLabel: '你的專屬通關 Code',
+        grandInputLabel: '登記大獎使用之名字/IG：',
+        grandBtn: '一鍵登記大獎',
+        grandRegistered: '大獎已登記',
+        grandSuccess: '✓ 大獎登記成功！請截圖此畫面領取終極大獎！',
+        placeholder: '寫名或寫 IG',
         copyBtn: '複製專屬 Code',
         copiedToast: '✓ 專屬 Code 已成功複製！'
       },
       'zh-CN': {
-        progressLabel: '解谜挑战进度',
-        welcomeSub: '解开全部 9 条万圣节谜语，解锁专属通关 Code！进度会自动保存。',
-        submitBtn: '提交答案',
-        solvedBadge: '已解答',
-        wrongMsg: '答案不正确，再试一次吧！',
-        congratsTitle: '🎉 恭喜通关！',
-        congratsSub: '你已经成功解开所有万圣节谜语！以下是你的专属通关 Code：',
-        codeLabel: '你的专属通关 Code',
-        registerNotice: '⚠️ 必须填写名字/IG并按“登记存档”，通关纪录才会发送至系统作实！',
-        nameLabel: '请输入名字或 IG：',
-        namePlaceholder: '写名或写 IG',
-        registerBtn: '登记存档',
+        progressLabel: '解谜挑战进度 (双阶段)',
+        welcomeSub: '完成前 5 条拿【小奖】！再挑战后面 4 条困难题冲刺【大奖】！',
+        s1Tag: 'Stage 1：简单组 (前 5 题)',
+        s1Desc: '达成即可兑换小奖 ✨',
+        s1Title: '🎁 恭喜达成 Stage 1 (小奖解锁)！',
+        s1Sub: '你已经完成前 5 条简单题！可先登记拿走小奖，或继续向下挑战困难题冲刺大奖！',
+        s1CodeLabel: '你的专属通关 Code',
+        s1InputLabel: '请输入名字或 IG (登记小奖)：',
+        s1Btn: '登记小奖',
+        s1Registered: '小奖已登记',
+        s1Success: '✓ 小奖登记成功！快去摊位领奖，并解锁下方困难题！',
+        s2Tag: 'Stage 2：地狱困难组 (后 4 题)',
+        s2Locked: '🔒 完成上方 Stage 1 后解锁大奖挑战',
+        s2Unlocked: '🔓 已解锁大奖挑战！',
+        grandTitle: '👑 终极通关！大奖解锁！',
+        grandSub: '太神了！你成功解开所有 9 条万圣节谜语，获得大奖资格！',
+        limitedNotice: '⚠️ 大奖数量有限，先到先得，派完即止！',
+        grandCodeLabel: '你的专属通关 Code',
+        grandInputLabel: '登记大奖使用之名字/IG：',
+        grandBtn: '一键登记大奖',
+        grandRegistered: '大奖已登记',
+        grandSuccess: '✓ 大奖登记成功！请截图此画面领取终极大奖！',
+        placeholder: '写名或写 IG',
         copyBtn: '复制专属 Code',
         copiedToast: '✓ 专属 Code 已成功复制！'
       }
     };
 
     let currentLang = 'zh-HK';
-    let generatedPlayerId = "";
-    let isRegistered = false;
+    let sharedPlayerId = "";
+    let savedPlayerName = "";
+    let isStage1Registered = false;
+    let isFinalRegistered = false;
 
-    // 9 條萬聖節謎語資料庫
     const riddles = [
-      { id: 1, question: "Who Is That Charming Hag?", answers: ["witch"], lengthHint: "5 Letters" },
-      { id: 2, question: "My mother makes sure to wrap me in the finest cloths.", answers: ["mummy"], lengthHint: "5 Letters" },
-      { id: 3, question: "Brr brr brr brr brr brr brr brr... it's so cold!", answers: ["october"], lengthHint: "7 Letters" },
-      { id: 4, question: "Wow, The Sin must've been worth the poisoned apple.", answers: ["snow white", "snowwhite", "snow-white"], lengthHint: "4, 5 Letters" },
-      { id: 5, question: "Position me right... or left. Never middle. Drink me... or don't. It's never simple.", answers: ["potion"], lengthHint: "6 Letters" },
-      { id: 6, question: "Dracula is great at hacking! Spreading viruses from the comfort of his own bed.", answers: ["coffin"], lengthHint: "6 Letters" },
-      { id: 7, question: "Seeing the knight's head cut off, beside him his trusty steed, I will not sleep soundly tonight.", answers: ["nightmare"], lengthHint: "9 Letters" },
-      { id: 8, question: "I steal behind my stern mom's back. Rotten egg, that's what I am.", answers: ["monster"], lengthHint: "7 Letters" },
-      { id: 9, question: "Not leeks. Mixed them up with a frame of sorts.", answers: ["skeleton"], lengthHint: "8 Letters" }
+      { id: 1, num: 1, question: "Who Is That Charming Hag?", answers: ["witch"], lengthHint: "5 Letters" },
+      { id: 2, num: 2, question: "My mother makes sure to wrap me in the finest cloths.", answers: ["mummy"], lengthHint: "5 Letters" },
+      { id: 3, num: 3, question: "Brr brr brr brr brr brr brr brr... it's so cold!", answers: ["october"], lengthHint: "7 Letters" },
+      { id: 4, num: 4, question: "Wow, The Sin must've been worth the poisoned apple.", answers: ["snow white", "snowwhite", "snow-white"], lengthHint: "4, 5 Letters" },
+      { id: 5, num: 5, question: "Position me right... or left. Never middle. Drink me... or don't. It's never simple.", answers: ["potion"], lengthHint: "6 Letters" },
+      { id: 6, num: 6, question: "Dracula is great at hacking! Spreading viruses from the comfort of his own bed.", answers: ["coffin"], lengthHint: "6 Letters" },
+      { id: 7, num: 7, question: "Seeing the knight's head cut off, beside him his trusty steed, I will not sleep soundly tonight.", answers: ["nightmare"], lengthHint: "9 Letters" },
+      { id: 8, num: 8, question: "I steal behind my stern mom's back. Rotten egg, that's what I am.", answers: ["monster"], lengthHint: "7 Letters" },
+      { id: 9, num: 9, question: "Not leeks. Mixed them up with a frame of sorts.", answers: ["skeleton"], lengthHint: "8 Letters" }
     ];
 
     let solvedState = {};
 
-    // 頁面載入時：從 LocalStorage 讀取已儲存嘅進度
     function loadProgress() {
       try {
         const savedSolved = localStorage.getItem('utopia_solved_state');
-        if (savedSolved) {
-          solvedState = JSON.parse(savedSolved);
+        if (savedSolved) solvedState = JSON.parse(savedSolved);
+
+        const pCode = localStorage.getItem('utopia_shared_id');
+        if (pCode) {
+          sharedPlayerId = pCode;
+        } else {
+          if (Object.keys(solvedState).length > 0) {
+            sharedPlayerId = `#UTOPIA-HW-${generateRandomCode()}`;
+            localStorage.setItem('utopia_shared_id', sharedPlayerId);
+          }
         }
-        const savedCode = localStorage.getItem('utopia_player_id');
-        if (savedCode) {
-          generatedPlayerId = savedCode;
+
+        const pName = localStorage.getItem('utopia_player_name');
+        if (pName) {
+          savedPlayerName = pName;
+          document.getElementById('registeredNameDisplay').innerText = savedPlayerName;
         }
-        const savedReg = localStorage.getItem('utopia_is_registered');
-        if (savedReg === 'true') {
-          isRegistered = true;
-        }
+
+        const s1Reg = localStorage.getItem('utopia_s1_reg');
+        if (s1Reg === 'true') isStage1Registered = true;
+
+        const fReg = localStorage.getItem('utopia_final_reg');
+        if (fReg === 'true') isFinalRegistered = true;
       } catch (e) {
-        console.error("Load progress error:", e);
+        console.error("Load error:", e);
       }
     }
 
-    // 儲存進度至 LocalStorage
     function saveProgress() {
       try {
         localStorage.setItem('utopia_solved_state', JSON.stringify(solvedState));
-        if (generatedPlayerId) {
-          localStorage.setItem('utopia_player_id', generatedPlayerId);
+        if (!sharedPlayerId && Object.keys(solvedState).length > 0) {
+          sharedPlayerId = `#UTOPIA-HW-${generateRandomCode()}`;
         }
-        localStorage.setItem('utopia_is_registered', isRegistered ? 'true' : 'false');
+        if (sharedPlayerId) {
+          localStorage.setItem('utopia_shared_id', sharedPlayerId);
+        }
+        if (savedPlayerName) {
+          localStorage.setItem('utopia_player_name', savedPlayerName);
+        }
+        localStorage.setItem('utopia_s1_reg', isStage1Registered ? 'true' : 'false');
+        localStorage.setItem('utopia_final_reg', isFinalRegistered ? 'true' : 'false');
       } catch (e) {
-        console.error("Save progress error:", e);
+        console.error("Save error:", e);
       }
     }
 
-    // 重設進度功能
     function resetProgress() {
-      if (confirm("確定要重設所有解謎進度重新開始嗎？")) {
-        localStorage.removeItem('utopia_solved_state');
-        localStorage.removeItem('utopia_player_id');
-        localStorage.removeItem('utopia_is_registered');
+      if (confirm(currentLang === 'en' ? "Reset all progress?" : "確定要重設所有進度重新開始嗎？")) {
+        localStorage.clear();
         location.reload();
       }
     }
 
     function setLanguage(lang) {
       currentLang = lang;
-      
       ['en', 'zh-HK', 'zh-CN'].forEach(l => {
         const btn = document.getElementById(`btn-${l}`);
         btn.className = (l === lang)
@@ -285,73 +391,97 @@
           : 'px-1.5 py-0.5 rounded font-medium transition text-purple-300 hover:text-white';
       });
 
-      const dict = i18n[lang];
-      document.getElementById('txt-progress-label').innerText = dict.progressLabel;
-      document.getElementById('txt-welcome-sub').innerText = dict.welcomeSub;
-      document.getElementById('txt-congrats-title').innerText = dict.congratsTitle;
-      document.getElementById('txt-congrats-sub').innerText = dict.congratsSub;
-      document.getElementById('txt-code-label').innerText = dict.codeLabel;
-      document.getElementById('txt-register-notice').innerText = dict.registerNotice;
-      document.getElementById('txt-name-label').innerText = dict.nameLabel;
-      document.getElementById('playerNameInput').placeholder = dict.namePlaceholder;
-      document.getElementById('submitRecordBtn').innerText = dict.registerBtn;
-      document.getElementById('btn-copy-txt').innerText = dict.copyBtn;
-      document.getElementById('copyToast').innerText = dict.copiedToast;
+      const d = i18n[lang];
+      document.getElementById('txt-progress-label').innerText = d.progressLabel;
+      document.getElementById('txt-welcome-sub').innerText = d.welcomeSub;
+      
+      document.getElementById('txt-s1-tag').innerText = d.s1Tag;
+      document.getElementById('txt-s1-desc').innerText = d.s1Desc;
+      document.getElementById('txt-s1-title').innerText = d.s1Title;
+      document.getElementById('txt-s1-sub').innerText = d.s1Sub;
+      document.getElementById('txt-s1-code-label').innerText = d.s1CodeLabel;
+      document.getElementById('txt-s1-input-label').innerText = d.s1InputLabel;
+      document.getElementById('stage1NameInput').placeholder = d.placeholder;
+      if (!isStage1Registered) document.getElementById('stage1Btn').innerText = d.s1Btn;
+      document.getElementById('stage1Status').innerText = d.s1Success;
+
+      document.getElementById('txt-s2-tag').innerText = d.s2Tag;
+      
+      document.getElementById('txt-grand-title').innerText = d.grandTitle;
+      document.getElementById('txt-grand-sub').innerText = d.grandSub;
+      document.getElementById('txt-limited-notice').innerText = d.limitedNotice;
+      document.getElementById('txt-grand-code-label').innerText = d.grandCodeLabel;
+      document.getElementById('txt-grand-input-label').innerText = d.grandInputLabel;
+      if (!isFinalRegistered) document.getElementById('submitRecordBtn').innerText = d.grandBtn;
+      document.getElementById('saveStatus').innerText = d.grandSuccess;
+
+      document.getElementById('btn-copy-txt').innerText = d.copyBtn;
+      document.getElementById('copyToast').innerText = d.copiedToast;
 
       renderRiddles();
+      updateGameFlow();
     }
 
     function renderRiddles() {
-      const container = document.getElementById('riddlesContainer');
-      const dict = i18n[currentLang];
-      
-      container.innerHTML = riddles.map((r, index) => {
-        const isSolved = solvedState[r.id];
-        return `
-          <div id="card-${r.id}" class="spooky-card rounded-2xl p-5 border transition-all duration-300 ${isSolved ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-purple-800/40'}">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-900/60 text-purple-300 border border-purple-700/50">
-                # ${index + 1}
-              </span>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-950/60 text-orange-400 border border-orange-800/40">
-                <i class="fa-solid fa-font mr-1"></i> ${r.lengthHint}
-              </span>
-            </div>
+      const s1Container = document.getElementById('stage1Container');
+      const s2Container = document.getElementById('stage2Container');
 
-            <p class="text-base font-semibold text-purple-100 mb-4 leading-snug">
-              "${r.question}"
-            </p>
+      const stage1Riddles = riddles.slice(0, 5);
+      const stage2Riddles = riddles.slice(5, 9);
 
-            ${isSolved ? `
-              <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-xl p-3 flex items-center justify-between">
-                <span class="text-emerald-400 text-xs font-semibold flex items-center gap-1.5">
-                  <i class="fa-solid fa-circle-check text-sm"></i> ${dict.solvedBadge}
-                </span>
-                <span class="text-emerald-300 font-mono text-sm font-bold capitalize">${r.answers[0]}</span>
-              </div>
-            ` : `
-              <div class="space-y-3">
-                <div>
-                  <input type="text" id="input-${r.id}" placeholder="${r.lengthHint}" 
-                    class="w-full bg-black/50 border border-purple-800/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
-                    onkeypress="if(event.key==='Enter') checkAnswer(${r.id})"
-                  >
-                  <p id="err-${r.id}" class="text-xs text-rose-400 mt-1.5 hidden flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> ${dict.wrongMsg}
-                  </p>
-                </div>
+      s1Container.innerHTML = stage1Riddles.map(r => renderCard(r, solvedState[r.id])).join('');
+      s2Container.innerHTML = stage2Riddles.map(r => renderCard(r, solvedState[r.id])).join('');
+    }
 
-                <div class="flex justify-end pt-1">
-                  <button onclick="checkAnswer(${r.id})" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold py-2.5 px-5 rounded-xl transition shadow-md flex items-center gap-1.5">
-                    <span>${dict.submitBtn}</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </button>
-                </div>
-              </div>
-            `}
+    function renderCard(r, isSolved) {
+      const wrongMsg = currentLang === 'en' ? 'Incorrect answer.' : (currentLang === 'zh-CN' ? '答案不正确，再试一次！' : '答案唔正確，再試試！');
+      const submitTxt = currentLang === 'en' ? 'Submit' : (currentLang === 'zh-CN' ? '提交答案' : '提交答案');
+      const solvedTxt = currentLang === 'en' ? 'SOLVED' : (currentLang === 'zh-CN' ? '已解答' : '已解答');
+
+      return `
+        <div id="card-${r.id}" class="spooky-card rounded-2xl p-5 border transition-all duration-300 ${isSolved ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-purple-800/40'}">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-900/60 text-purple-300 border border-purple-700/50">
+              # ${r.num}
+            </span>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-950/60 text-orange-400 border border-orange-800/40">
+              <i class="fa-solid fa-font mr-1"></i> ${r.lengthHint}
+            </span>
           </div>
-        `;
-      }).join('');
+
+          <p class="text-base font-semibold text-purple-100 mb-4 leading-snug">
+            "${r.question}"
+          </p>
+
+          ${isSolved ? `
+            <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-xl p-3 flex items-center justify-between">
+              <span class="text-emerald-400 text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-sm"></i> ${solvedTxt}
+              </span>
+              <span class="text-emerald-300 font-mono text-sm font-bold capitalize">${r.answers[0]}</span>
+            </div>
+          ` : `
+            <div class="space-y-3">
+              <div>
+                <input type="text" id="input-${r.id}" placeholder="${r.lengthHint}" 
+                  class="w-full bg-black/50 border border-purple-800/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:border-orange-500 transition"
+                  onkeypress="if(event.key==='Enter') checkAnswer(${r.id})"
+                >
+                <p id="err-${r.id}" class="text-xs text-rose-400 mt-1.5 hidden flex items-center gap-1">
+                  <i class="fa-solid fa-triangle-exclamation"></i> ${wrongMsg}
+                </p>
+              </div>
+
+              <div class="flex justify-end pt-1">
+                <button onclick="checkAnswer(${r.id})" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold py-2.5 px-5 rounded-xl transition shadow-md flex items-center gap-1.5">
+                  <span>${submitTxt}</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          `}
+        </div>
+      `;
     }
 
     function checkAnswer(id) {
@@ -370,8 +500,13 @@
       if (isCorrect) {
         solvedState[id] = true;
         errEl.classList.add('hidden');
-        saveProgress(); // 答對即刻自動儲存
-        updateProgress();
+        
+        if (!sharedPlayerId) {
+          sharedPlayerId = `#UTOPIA-HW-${generateRandomCode()}`;
+        }
+
+        saveProgress();
+        updateGameFlow();
         renderRiddles();
       } else {
         errEl.classList.remove('hidden');
@@ -381,123 +516,139 @@
       }
     }
 
-    function updateProgress() {
-      const solvedCount = Object.keys(solvedState).length;
-      const total = riddles.length;
-      const percent = (solvedCount / total) * 100;
-
-      document.getElementById('progressText').innerText = `${solvedCount} / ${total}`;
+    function updateGameFlow() {
+      const totalSolved = Object.keys(solvedState).length;
+      const percent = (totalSolved / 9) * 100;
+      document.getElementById('progressText').innerText = `${totalSolved} / 9`;
       document.getElementById('progressBar').style.width = `${percent}%`;
 
-      if (solvedCount === total) {
-        triggerWin();
+      if (sharedPlayerId) {
+        document.getElementById('stage1CodeDisplay').innerText = sharedPlayerId;
+        document.getElementById('playerCodeDisplay').innerText = sharedPlayerId;
+      }
+
+      const stage1Riddles = riddles.slice(0, 5);
+      const stage2Riddles = riddles.slice(5, 9);
+      const isStage1Complete = stage1Riddles.every(r => solvedState[r.id]);
+      const d = i18n[currentLang];
+
+      if (isStage1Complete) {
+        document.getElementById('stage1Card').classList.remove('hidden');
+        const wrapper = document.getElementById('stage2Wrapper');
+        wrapper.classList.remove('opacity-40', 'pointer-events-none');
+        document.getElementById('stage2LockNotice').innerHTML = d.s2Unlocked;
+        document.getElementById('stage2LockNotice').className = 'text-[11px] text-emerald-400 font-bold';
+      } else {
+        document.getElementById('stage2LockNotice').innerHTML = d.s2Locked;
+      }
+
+      if (isStage1Registered) {
+        const btn = document.getElementById('stage1Btn');
+        btn.disabled = true;
+        btn.innerText = d.s1Registered;
+        btn.className = 'bg-emerald-600 text-white font-extrabold px-3 py-2 rounded-xl text-xs shrink-0';
+        document.getElementById('stage1Status').classList.remove('hidden');
+      }
+
+      const isAllComplete = stage2Riddles.every(r => solvedState[r.id]) && isStage1Complete;
+      if (isAllComplete) {
+        if (isFinalRegistered) {
+          const fBtn = document.getElementById('submitRecordBtn');
+          fBtn.disabled = true;
+          fBtn.innerText = d.grandRegistered;
+          fBtn.className = 'w-full bg-emerald-600 text-white font-extrabold py-2.5 rounded-xl text-xs shrink-0';
+          document.getElementById('saveStatus').classList.remove('hidden');
+        }
+
+        const secretCard = document.getElementById('secretCard');
+        secretCard.classList.remove('hidden');
+
+        confetti({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.6 },
+          colors: ['#eab308', '#f97316', '#a855f7', '#22c55e']
+        });
       }
     }
 
-    function generateUniqueCode() {
+    function generateRandomCode() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let result = '';
       for (let i = 0; i < 12; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      return `#UTOPIA-HW-${result}`;
+      return result;
     }
 
-    function triggerWin() {
-      if (!generatedPlayerId) {
-        generatedPlayerId = generateUniqueCode();
-        saveProgress();
-      }
-      
-      document.getElementById('playerCodeDisplay').innerText = generatedPlayerId;
+    function submitStage1Record() {
+      const name = document.getElementById('stage1NameInput').value.trim();
+      if (!name) { alert(currentLang === 'en' ? 'Please enter name or IG!' : '請輸入名字或 IG 先！'); return; }
 
-      if (isRegistered) {
-        const btn = document.getElementById('submitRecordBtn');
-        btn.disabled = true;
-        btn.innerText = '已登記';
-        btn.classList.remove('from-orange-500', 'to-amber-500');
-        btn.classList.add('bg-emerald-600', 'text-white');
-        document.getElementById('saveStatus').classList.remove('hidden');
-      }
+      savedPlayerName = name;
+      document.getElementById('registeredNameDisplay').innerText = savedPlayerName;
 
-      const secretCard = document.getElementById('secretCard');
-      secretCard.classList.remove('hidden');
-      
-      setTimeout(() => {
-        secretCard.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#a855f7', '#f97316', '#eab308', '#22c55e']
-      });
-    }
-
-    function submitPlayerRecord() {
-      const nameInput = document.getElementById('playerNameInput').value.trim();
-      if (!nameInput) {
-        alert('請輸入名字或 IG 先！');
-        return;
-      }
-
-      if (isRegistered) {
-        alert('你已經完成登記記錄喇！');
-        return;
-      }
-
-      const btn = document.getElementById('submitRecordBtn');
+      const btn = document.getElementById('stage1Btn');
       btn.disabled = true;
-      btn.innerText = '登記中...';
-
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-        alert('提示：未設定 Google Apps Script URL，暫時無法寫入雲端試算表。');
-        btn.disabled = false;
-        return;
-      }
+      btn.innerText = 'Sending...';
 
       fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          playerId: generatedPlayerId, 
-          playerName: nameInput 
-        })
+        body: JSON.stringify({ playerId: sharedPlayerId, playerName: savedPlayerName, status: '完成簡單 (5/9)' })
       }).then(() => {
-        isRegistered = true;
+        isStage1Registered = true;
         saveProgress();
-        btn.innerText = '已登記';
-        btn.classList.remove('from-orange-500', 'to-amber-500');
-        btn.classList.add('bg-emerald-600', 'text-white');
+        const d = i18n[currentLang];
+        btn.innerText = d.s1Registered;
+        btn.className = 'bg-emerald-600 text-white font-extrabold px-3 py-2 rounded-xl text-xs shrink-0';
+        document.getElementById('stage1Status').classList.remove('hidden');
+      }).catch(err => {
+        alert('Error saving record!');
+        btn.disabled = false;
+        btn.innerText = i18n[currentLang].s1Btn;
+      });
+    }
+
+    function submitPlayerRecord() {
+      if (!savedPlayerName) { alert('請先完成 Stage 1 登記名字！'); return; }
+
+      const btn = document.getElementById('submitRecordBtn');
+      btn.disabled = true;
+      btn.innerText = 'Sending...';
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId: sharedPlayerId, playerName: savedPlayerName, status: '完成全部 (9/9)' })
+      }).then(() => {
+        isFinalRegistered = true;
+        saveProgress();
+        const d = i18n[currentLang];
+        btn.innerText = d.grandRegistered;
+        btn.className = 'w-full bg-emerald-600 text-white font-extrabold py-2.5 rounded-xl text-xs shrink-0';
         document.getElementById('saveStatus').classList.remove('hidden');
       }).catch(err => {
-        console.error("Save error:", err);
-        alert('登記失敗，請重試！');
+        alert('Error saving record!');
         btn.disabled = false;
-        btn.innerText = '登記存檔';
+        btn.innerText = i18n[currentLang].grandBtn;
       });
     }
 
     function copyPlayerCode() {
-      if (!generatedPlayerId) return;
-      navigator.clipboard.writeText(generatedPlayerId).then(() => {
+      if (!sharedPlayerId) return;
+      navigator.clipboard.writeText(sharedPlayerId).then(() => {
         const toast = document.getElementById('copyToast');
         toast.classList.remove('opacity-0');
-        setTimeout(() => {
-          toast.classList.add('opacity-0');
-        }, 2000);
+        setTimeout(() => toast.classList.add('opacity-0'), 2000);
       });
     }
 
-    // 初始化：載入舊進度、渲染頁面、更新進度條
+    // 初始化
     loadProgress();
     setLanguage('zh-HK');
-    updateProgress();
-    if (Object.keys(solvedState).length === riddles.length) {
-      triggerWin();
-    }
   </script>
 </body>
 </html>
