@@ -49,12 +49,16 @@
         </span>
       </div>
 
-      <!-- Language Selector -->
-      <div class="flex items-center gap-1 bg-purple-950/60 p-1 rounded-lg border border-purple-800/40 text-xs shrink-0">
-        <i class="fa-solid fa-globe text-purple-400 ml-1 hidden sm:inline"></i>
-        <button onclick="setLanguage('en')" id="btn-en" class="px-1.5 py-0.5 rounded font-medium transition">EN</button>
-        <button onclick="setLanguage('zh-HK')" id="btn-zh-HK" class="px-1.5 py-0.5 rounded font-medium transition">繁</button>
-        <button onclick="setLanguage('zh-CN')" id="btn-zh-CN" class="px-1.5 py-0.5 rounded font-medium transition">简</button>
+      <!-- Language Selector & Reset -->
+      <div class="flex items-center gap-1.5">
+        <button onclick="resetProgress()" title="重設進度" class="bg-purple-950/60 hover:bg-rose-950/80 text-purple-300 hover:text-rose-400 p-1.5 rounded-lg border border-purple-800/40 text-xs transition">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+        <div class="flex items-center gap-1 bg-purple-950/60 p-1 rounded-lg border border-purple-800/40 text-xs shrink-0">
+          <button onclick="setLanguage('en')" id="btn-en" class="px-1.5 py-0.5 rounded font-medium transition">EN</button>
+          <button onclick="setLanguage('zh-HK')" id="btn-zh-HK" class="px-1.5 py-0.5 rounded font-medium transition">繁</button>
+          <button onclick="setLanguage('zh-CN')" id="btn-zh-CN" class="px-1.5 py-0.5 rounded font-medium transition">简</button>
+        </div>
       </div>
     </div>
 
@@ -86,7 +90,7 @@
         <span class="text-orange-400">🎃</span>
       </h1>
       <p id="txt-welcome-sub" class="text-xs text-purple-300/80 leading-relaxed max-w-xs mx-auto">
-        解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！
+        解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！進度會自動儲存。
       </p>
     </div>
 
@@ -161,7 +165,7 @@
     const i18n = {
       'en': {
         progressLabel: 'Challenge Progress',
-        welcomeSub: 'Solve all 9 spooky Halloween riddles to unlock your unique clearance Code!',
+        welcomeSub: 'Solve all 9 spooky Halloween riddles to unlock your unique clearance Code! Progress auto-saves.',
         submitBtn: 'Submit Answer',
         solvedBadge: 'SOLVED',
         wrongMsg: 'Incorrect answer. Try again!',
@@ -177,7 +181,7 @@
       },
       'zh-HK': {
         progressLabel: '解謎挑戰進度',
-        welcomeSub: '解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！',
+        welcomeSub: '解開全部 9 條萬聖節謎語，解鎖專屬通關 Code！進度會自動儲存。',
         submitBtn: '提交答案',
         solvedBadge: '已解答',
         wrongMsg: '答案唔正確，再試試！',
@@ -193,7 +197,7 @@
       },
       'zh-CN': {
         progressLabel: '解谜挑战进度',
-        welcomeSub: '解开全部 9 条万圣节谜语，解锁专属通关 Code！',
+        welcomeSub: '解开全部 9 条万圣节谜语，解锁专属通关 Code！进度会自动保存。',
         submitBtn: '提交答案',
         solvedBadge: '已解答',
         wrongMsg: '答案不正确，再试一次吧！',
@@ -213,7 +217,7 @@
     let generatedPlayerId = "";
     let isRegistered = false;
 
-    // 完整的 9 條萬聖節謎語資料庫
+    // 9 條萬聖節謎語資料庫
     const riddles = [
       { id: 1, question: "Who Is That Charming Hag?", answers: ["witch"], lengthHint: "5 Letters" },
       { id: 2, question: "My mother makes sure to wrap me in the finest cloths.", answers: ["mummy"], lengthHint: "5 Letters" },
@@ -227,6 +231,49 @@
     ];
 
     let solvedState = {};
+
+    // 頁面載入時：從 LocalStorage 讀取已儲存嘅進度
+    function loadProgress() {
+      try {
+        const savedSolved = localStorage.getItem('utopia_solved_state');
+        if (savedSolved) {
+          solvedState = JSON.parse(savedSolved);
+        }
+        const savedCode = localStorage.getItem('utopia_player_id');
+        if (savedCode) {
+          generatedPlayerId = savedCode;
+        }
+        const savedReg = localStorage.getItem('utopia_is_registered');
+        if (savedReg === 'true') {
+          isRegistered = true;
+        }
+      } catch (e) {
+        console.error("Load progress error:", e);
+      }
+    }
+
+    // 儲存進度至 LocalStorage
+    function saveProgress() {
+      try {
+        localStorage.setItem('utopia_solved_state', JSON.stringify(solvedState));
+        if (generatedPlayerId) {
+          localStorage.setItem('utopia_player_id', generatedPlayerId);
+        }
+        localStorage.setItem('utopia_is_registered', isRegistered ? 'true' : 'false');
+      } catch (e) {
+        console.error("Save progress error:", e);
+      }
+    }
+
+    // 重設進度功能
+    function resetProgress() {
+      if (confirm("確定要重設所有解謎進度重新開始嗎？")) {
+        localStorage.removeItem('utopia_solved_state');
+        localStorage.removeItem('utopia_player_id');
+        localStorage.removeItem('utopia_is_registered');
+        location.reload();
+      }
+    }
 
     function setLanguage(lang) {
       currentLang = lang;
@@ -323,6 +370,7 @@
       if (isCorrect) {
         solvedState[id] = true;
         errEl.classList.add('hidden');
+        saveProgress(); // 答對即刻自動儲存
         updateProgress();
         renderRiddles();
       } else {
@@ -358,7 +406,18 @@
     function triggerWin() {
       if (!generatedPlayerId) {
         generatedPlayerId = generateUniqueCode();
-        document.getElementById('playerCodeDisplay').innerText = generatedPlayerId;
+        saveProgress();
+      }
+      
+      document.getElementById('playerCodeDisplay').innerText = generatedPlayerId;
+
+      if (isRegistered) {
+        const btn = document.getElementById('submitRecordBtn');
+        btn.disabled = true;
+        btn.innerText = '已登記';
+        btn.classList.remove('from-orange-500', 'to-amber-500');
+        btn.classList.add('bg-emerald-600', 'text-white');
+        document.getElementById('saveStatus').classList.remove('hidden');
       }
 
       const secretCard = document.getElementById('secretCard');
@@ -408,6 +467,7 @@
         })
       }).then(() => {
         isRegistered = true;
+        saveProgress();
         btn.innerText = '已登記';
         btn.classList.remove('from-orange-500', 'to-amber-500');
         btn.classList.add('bg-emerald-600', 'text-white');
@@ -431,7 +491,13 @@
       });
     }
 
+    // 初始化：載入舊進度、渲染頁面、更新進度條
+    loadProgress();
     setLanguage('zh-HK');
+    updateProgress();
+    if (Object.keys(solvedState).length === riddles.length) {
+      triggerWin();
+    }
   </script>
 </body>
 </html>
